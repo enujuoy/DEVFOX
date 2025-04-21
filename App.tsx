@@ -5,6 +5,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import BottomTab from './components/BottomTab';
 import CategorySettingScreen from './screens/CategorySettingScreen';
 import MapScreen from './screens/MapScreen';
+import * as Notifications from 'expo-notifications'; // ✅ 추가
 
 export type RootStackParamList = {
   MainTabs: undefined;
@@ -13,6 +14,14 @@ export type RootStackParamList = {
 };
 
 const RootStack = createNativeStackNavigator<RootStackParamList>();
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,      
+    shouldPlaySound: true,          
+    shouldSetBadge: false,     
+  }),
+});
 
 export default function App() {
   return (

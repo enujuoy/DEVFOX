@@ -1,13 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View, StyleSheet, Animated, TouchableOpacity, Image } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useFocusEffect } from '@react-navigation/native';
 import CustomMap from '../components/Map';
 import Popup from '../components/Popup';
 import serviceAreas from '../constants/serviceAreas';
 import { getDistance } from '../utils/distance';
 import MapView from 'react-native-maps';
 import * as Notifications from 'expo-notifications';
+import * as Device from 'expo-device';
 import BackIcon from '../assets/back_botton.png';
 
 export default function MapScreen({ navigation }: { navigation: NativeStackNavigationProp<any> }) {
@@ -26,28 +26,32 @@ export default function MapScreen({ navigation }: { navigation: NativeStackNavig
 
   const mapRef = useRef<MapView>(null);
 
-  const alreadyNotified = useRef(false);
-
+  // ✅ 알림 권한 및 채널 설정
   useEffect(() => {
     const setupNotifications = async () => {
-      const { status } = await Notifications.requestPermissionsAsync();
-      if (status !== 'granted') {
-        alert('通知の許可が必要です');
-        return;
-      }
+      if (Device.isDevice) {
+        const { status } = await Notifications.requestPermissionsAsync();
+        if (status !== 'granted') {
+          alert('通知の許可が必要です');
+          return;
+        }
 
-      await Notifications.setNotificationChannelAsync('default', {
-        name: 'default',
-        importance: Notifications.AndroidImportance.MAX,
-        lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
-        vibrationPattern: [0, 250, 250, 250],
-        sound: 'default',
-      });
+        await Notifications.setNotificationChannelAsync('default', {
+          name: 'default',
+          importance: Notifications.AndroidImportance.MAX,
+          lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
+          vibrationPattern: [0, 250, 250, 250],
+          sound: 'default',
+        });
+      } else {
+        alert('実機でテストしてください');
+      }
     };
 
     setupNotifications();
   }, []);
 
+  // ✅ 알림 발송
   const triggerLocalNotification = async (title: string, body: string) => {
     await Notifications.scheduleNotificationAsync({
       content: {
@@ -59,6 +63,7 @@ export default function MapScreen({ navigation }: { navigation: NativeStackNavig
     });
   };
 
+  // ✅ 팝업 애니메이션
   const showPopup = (text: string) => {
     setPopupText(text);
     setPopupVisible(true);
@@ -100,8 +105,6 @@ export default function MapScreen({ navigation }: { navigation: NativeStackNavig
   };
 
   const checkNearbyServiceArea = () => {
-    if (alreadyNotified.current) return;
-
     for (const area of serviceAreas) {
       const distance = getDistance(myLat, myLon, area.latitude, area.longitude);
       if (distance <= 1.0) {
@@ -109,7 +112,6 @@ export default function MapScreen({ navigation }: { navigation: NativeStackNavig
         showHighlight('EV急速充電スタンド\n基数：3基');
         triggerLocalNotification(area.name, area.description);
         triggerLocalNotification('EV急速充電スタンド', '基数：3基');
-        alreadyNotified.current = true; 
         break;
       }
     }
@@ -118,24 +120,6 @@ export default function MapScreen({ navigation }: { navigation: NativeStackNavig
   useEffect(() => {
     checkNearbyServiceArea();
   }, []);
-
-  useFocusEffect(
-    React.useCallback(() => {
-      const timeout = setTimeout(() => {
-        mapRef.current?.animateToRegion(
-          {
-            latitude: myLat,
-            longitude: myLon,
-            latitudeDelta: 0.005,
-            longitudeDelta: 0.005,
-          },
-          1000
-        );
-      }, 300);
-
-      return () => clearTimeout(timeout);
-    }, [])
-  );
 
   return (
     <View style={styles.container}>

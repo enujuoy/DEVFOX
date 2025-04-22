@@ -7,7 +7,9 @@ import { createStackNavigator } from '@react-navigation/stack';
 import MainScreen from '../screens/MainScreen';
 import EventScreen from '../screens/EventScreen';
 import EventDetailScreen from '../screens/EventDetailScreen';
-import MyPageScreen from '../screens/MyPageScreen_Market';
+import MyPageScreen_Market from '../screens/MyPageScreen_Market';
+import MyPageScreen_Market_Event from '../screens/MyPageScreen_Market_Event';
+import EventUpdateScreen from '../screens/EventUpdateScreen';
 
 // 타입 정의
 export type HomeStackParamList = {
@@ -29,9 +31,16 @@ export type EventStackParamList = {
   };
 };
 
+export type MyPageMarketStackParamList = {
+  MyPageTop: undefined;
+  EventManagement: undefined;
+  EventUpdate: undefined;
+};
+
 // Stack Navigators
 const HomeStack = createStackNavigator<HomeStackParamList>();
 const EventStack = createStackNavigator<EventStackParamList>();
+const MyPageStack = createStackNavigator<MyPageMarketStackParamList>();
 
 function HomeStackScreen() {
   return (
@@ -52,6 +61,16 @@ function EventStackScreen() {
   );
 }
 
+function MyPageMarketStackScreen() {
+  return (
+    <MyPageStack.Navigator screenOptions={{ headerShown: false }}>
+      <MyPageStack.Screen name="MyPageTop" component={MyPageScreen_Market} />
+      <MyPageStack.Screen name="EventManagement" component={MyPageScreen_Market_Event} />
+      <MyPageStack.Screen name="EventUpdate" component={EventUpdateScreen} />
+    </MyPageStack.Navigator>
+  );
+}
+
 // Bottom Tab
 const Tab = createBottomTabNavigator();
 
@@ -61,31 +80,17 @@ export default function BottomTab() {
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarIcon: ({ color, size }) => {
-          let iconName: React.ComponentProps<typeof Ionicons>['name'] = 'home';
+          let iconName: string = 'home';
           if (route.name === 'HomeTab') iconName = 'home';
           else if (route.name === 'EventTab') iconName = 'gift';
           else if (route.name === 'MypageTab') iconName = 'person';
-          return <Ionicons name={iconName} size={size} color={color} />;
+          return <Ionicons name={iconName as any} size={size} color={color} />;
         },
-        tabBarActiveTintColor: '#007AFF',
-        tabBarInactiveTintColor: 'gray',
       })}
     >
-      <Tab.Screen
-        name="HomeTab"
-        component={HomeStackScreen}
-        options={{ tabBarLabel: 'ホーム' }}
-      />
-      <Tab.Screen
-        name="EventTab"
-        component={EventStackScreen}
-        options={{ tabBarLabel: 'イベント' }}
-      />
-      <Tab.Screen
-        name="MypageTab"
-        component={MyPageScreen}
-        options={{ tabBarLabel: 'マイページ' }}
-      />
+      <Tab.Screen name="HomeTab" component={HomeStackScreen} options={{ tabBarLabel: 'ホーム' }} />
+      <Tab.Screen name="EventTab" component={EventStackScreen} options={{ tabBarLabel: 'イベント' }} />
+      <Tab.Screen name="MypageTab" component={MyPageMarketStackScreen} options={{ tabBarLabel: 'マイページ' }} />
     </Tab.Navigator>
   );
 }

@@ -13,9 +13,9 @@ import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import * as DocumentPicker from 'expo-document-picker';
 import { StackScreenProps } from '@react-navigation/stack';
 import { format } from 'date-fns';
-import { MyPageMarketStackParamList } from '../components/MyPageTab_Market';
+import { MyPageMarketStackParamList } from '../components/MyPageMarketStack';
 
-type Props = StackScreenProps<MyPageMarketStackParamList, 'EventManagement'>;
+type Props = StackScreenProps<MyPageMarketStackParamList, 'EventUpdate'>;
 
 export default function EventUpdateScreen({ navigation }: Props) {
   const [startDate, setStartDate] = useState(new Date());
@@ -43,7 +43,7 @@ export default function EventUpdateScreen({ navigation }: Props) {
   // 🛠 유효성 검사 추가 및 포맷
   const onCreate = () => {
     if (!title.trim()) {
-      Alert.alert('이벤트명을 입력해주세요.');
+      Alert.alert('イベント名を入力してください。');
       return;
     }
     if (startDate > endDate) {
@@ -102,13 +102,13 @@ export default function EventUpdateScreen({ navigation }: Props) {
       {/* 📝 제목·설명 입력 */}
       <TextInput
         style={styles.input}
-        placeholder="이벤트 명"
+        placeholder="イベント名"
         value={title}
         onChangeText={setTitle}
       />
       <TextInput
         style={[styles.input, styles.textArea]}
-        placeholder="이벤트 설명"
+        placeholder="イベント情報"
         value={desc}
         onChangeText={setDesc}
         multiline
@@ -116,7 +116,7 @@ export default function EventUpdateScreen({ navigation }: Props) {
 
       {/* 📎 파일 첨부 */}
       <TouchableOpacity style={styles.uploadBtn} onPress={pickFile}>
-        <Text>파일 첨부</Text>
+        <Text>ファイル添付</Text>
       </TouchableOpacity>
       {fileName ? <Text style={{ marginBottom: 12 }}>{fileName}</Text> : null}
 

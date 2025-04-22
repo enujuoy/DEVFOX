@@ -5,7 +5,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import BottomTab from './components/BottomTab';
 import CategorySettingScreen from './screens/CategorySettingScreen';
 import MapScreen from './screens/MapScreen';
-import * as Notifications from 'expo-notifications'; // ✅ 추가
+import * as Notifications from 'expo-notifications';
 
 export type RootStackParamList = {
   MainTabs: undefined;

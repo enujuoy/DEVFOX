@@ -20,6 +20,7 @@ export type HomeStackParamList = {
     title: string;
     image: any;
     description: string;
+    date: string;
   };
 };
 
@@ -29,6 +30,7 @@ export type EventStackParamList = {
     title: string;
     image: any;
     description: string;
+    date: string;
   };
 };
 

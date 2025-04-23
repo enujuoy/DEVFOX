@@ -26,7 +26,6 @@ export default function MapScreen({ navigation }: { navigation: NativeStackNavig
 
   const mapRef = useRef<MapView>(null);
 
-  // ✅ 알림 권한 및 채널 설정
   useEffect(() => {
     const setupNotifications = async () => {
       if (Device.isDevice) {
@@ -51,7 +50,6 @@ export default function MapScreen({ navigation }: { navigation: NativeStackNavig
     setupNotifications();
   }, []);
 
-  // ✅ 알림 발송
   const triggerLocalNotification = async (title: string, body: string) => {
     await Notifications.scheduleNotificationAsync({
       content: {
@@ -63,7 +61,6 @@ export default function MapScreen({ navigation }: { navigation: NativeStackNavig
     });
   };
 
-  // ✅ 팝업 애니메이션
   const showPopup = (text: string) => {
     setPopupText(text);
     setPopupVisible(true);

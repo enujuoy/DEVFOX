@@ -1,40 +1,35 @@
-import { StackScreenProps } from '@react-navigation/stack';
+// screens/EventDetailScreen.tsx
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, Image, Dimensions } from 'react-native';
+import { RouteProp, useRoute } from '@react-navigation/native';
+import { HomeStackParamList } from '../components/BottomTab';
 import Header from '../components/Header';
-import BottomTab from '../components/BottomTab';
 
 const { width } = Dimensions.get('window');
 
+type EventDetailRouteProp = RouteProp<HomeStackParamList, 'EventDetail'>;
+
 const EventDetailScreen = () => {
+  const route = useRoute<EventDetailRouteProp>();
+  const { title, image, description, date } = route.params;
+
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scroll}>
         <Header />
 
-        <Text style={styles.title}>海老名 SA</Text>
+        <Text style={styles.title}>{title}</Text>
 
-        <Image
-          source={require('../assets/event-detail.jpg')} // 이미지 넣기
-          style={styles.image}
-          resizeMode="contain"
-        />
+        <Image source={image} style={styles.image} resizeMode="contain" />
 
-        <Text style={styles.location}>
-          E1 東名高速道路EXPASA海老名（上り）中央催事場 にて
-        </Text>
-        <Text style={styles.date}>2025.04.04〜2025.06.09</Text>
+        <Text style={styles.date}>{date}</Text>
 
-        <Text style={styles.description}>
-          新潟県・富山県・石川県・福井県の北陸4県、200点を超える多彩な商品の数々が名を連ね...
-        </Text>
-
-        <Text style={styles.subTitle}>催事概要</Text>
-        <Text style={styles.date}>（開催期間） 2025年4月4日（金）～6月9日（月）</Text>
+        <Text style={styles.description}>{description}</Text>
       </ScrollView>
     </View>
   );
 };
+
 export default EventDetailScreen;
 
 const styles = StyleSheet.create({
@@ -58,11 +53,6 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     marginBottom: 10,
   },
-  location: {
-    fontSize: 14,
-    fontWeight: '600',
-    marginBottom: 4,
-  },
   date: {
     fontSize: 13,
     marginBottom: 10,
@@ -71,10 +61,5 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
     marginBottom: 20,
-  },
-  subTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginTop: 10,
   },
 });

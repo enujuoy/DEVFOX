@@ -1,123 +1,74 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, StyleSheet, Animated, TouchableOpacity, Image } from 'react-native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { View, StyleSheet, Animated, Text, ActivityIndicator } from 'react-native';
+import * as Location from 'expo-location';
+import * as Notifications from 'expo-notifications';
 import MapView from 'react-native-maps';
 
 import CustomMap from '../components/Map';
-import Popup from '../components/Popup';
-import BackIcon from '../assets/back_botton.png';
+import { getNearbyStores } from '../utils/getNearbyStores';
+import { notifyNearbyStores } from '../utils/sendStoreNotifications';
 
-import { useNotifications } from '../constants/useNotifications';
-import { useNearbyServiceAlert } from '../constants/useNearbyServiceAlert';
-
-// ... 생략 import ...
-
-export default function MapScreen({ navigation }: { navigation: NativeStackNavigationProp<any> }) {
-  const myLat = 35.42929653161845;
-  const myLon = 139.3967174020167;
-
-  const [popupVisible, setPopupVisible] = useState(false);
-  const [popupText, setPopupText] = useState('');
-  const popupOpacity = useRef(new Animated.Value(0)).current;
-  const popupTranslate = useRef(new Animated.Value(0)).current;
-
-  const [highlightVisible, setHighlightVisible] = useState(false);
-  const [highlightText, setHighlightText] = useState('');
-  const highlightOpacity = useRef(new Animated.Value(0)).current;
-  const highlightTranslate = useRef(new Animated.Value(0)).current;
-
+export default function MapScreen() {
+  const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [stores, setStores] = useState<any[]>([]);
   const mapRef = useRef<MapView>(null);
 
-  const showPopup = (text: string) => {
-    setPopupText(text);
-    setPopupVisible(true);
-    popupTranslate.setValue(0);
-    popupOpacity.setValue(0);
-
-    Animated.parallel([
-      Animated.timing(popupOpacity, { toValue: 1, duration: 300, useNativeDriver: true }),
-      Animated.timing(popupTranslate, { toValue: 0, duration: 300, useNativeDriver: true }),
-    ]).start();
-
-    setTimeout(() => {
-      Animated.parallel([
-        Animated.timing(popupOpacity, { toValue: 0, duration: 300, useNativeDriver: true }),
-        Animated.timing(popupTranslate, { toValue: -40, duration: 300, useNativeDriver: true }),
-      ]).start(() => setPopupVisible(false));
-    }, 7000);
-  };
-
-  const showHighlight = (text: string) => {
-    setTimeout(() => {
-      setHighlightText(text);
-      setHighlightVisible(true);
-      highlightTranslate.setValue(0);
-      highlightOpacity.setValue(0);
-
-      Animated.parallel([
-        Animated.timing(highlightOpacity, { toValue: 1, duration: 300, useNativeDriver: true }),
-        Animated.timing(highlightTranslate, { toValue: 0, duration: 300, useNativeDriver: true }),
-      ]).start();
-
-      setTimeout(() => {
-        Animated.parallel([
-          Animated.timing(highlightOpacity, { toValue: 0, duration: 300, useNativeDriver: true }),
-          Animated.timing(highlightTranslate, { toValue: -40, duration: 300, useNativeDriver: true }),
-        ]).start(() => setHighlightVisible(false));
-      }, 8000);
-    }, 300);
-  };
-
-  const { setup: setupNotifications } = useNotifications();
-  const { check: checkNearbyServiceArea } = useNearbyServiceAlert(
-    myLat, myLon, showPopup, showHighlight
-  );
-
   useEffect(() => {
-    setupNotifications();
-    checkNearbyServiceArea();
+    (async () => {
+      // 1. 알림 권한 요청
+      const { status: notifStatus } = await Notifications.requestPermissionsAsync();
+      if (notifStatus !== 'granted') {
+        alert('通知の許可が必要です');
+        return;
+      }
+
+      // 2. 위치 권한 요청
+      const { status: locStatus } = await Location.requestForegroundPermissionsAsync();
+      if (locStatus !== 'granted') {
+        alert('位置情報の許可が必要です');
+        return;
+      }
+
+      // 3. 현재 위치 얻기
+      const loc = await Location.getCurrentPositionAsync({});
+      const { latitude, longitude } = loc.coords;
+      setLocation({ latitude, longitude });
+
+      // 4. 편의점 정보 불러오기
+      const nearby = await getNearbyStores(latitude, longitude);
+      setStores(nearby);
+
+      // 5. 편의점 정보에 대해 알림 보내기
+      await notifyNearbyStores(nearby);
+    })();
   }, []);
+
+  if (!location) {
+    return (
+      <View style={styles.loading}>
+        <ActivityIndicator size="large" />
+        <Text>現在地を取得中...</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate('home')}>
-        <Image source={BackIcon} style={styles.backIcon} />
-      </TouchableOpacity>
-
-      <CustomMap myLat={myLat} myLon={myLon} serviceAreas={[]} mapRef={mapRef} />
-
-      {popupVisible && (
-        <Popup
-          type="normal"
-          text={popupText}
-          opacity={popupOpacity}
-          translateY={popupTranslate}
-        />
-      )}
-
-      {highlightVisible && (
-        <Popup
-          type="highlight"
-          text={highlightText}
-          opacity={highlightOpacity}
-          translateY={highlightTranslate}
-        />
-      )}
+      <CustomMap
+        myLat={location.latitude}
+        myLon={location.longitude}
+        serviceAreas={stores}
+        mapRef={mapRef}
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  backButton: {
-    position: 'absolute',
-    top: 40,
-    left: 20,
-    zIndex: 1000,
-  },
-  backIcon: {
-    width: 32,
-    height: 32,
-    tintColor: '#333',
+  loading: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

@@ -3,5 +3,6 @@ export type ServiceArea = {
     latitude: number;
     longitude: number;
     description: string;
+    address: string;
   };
   

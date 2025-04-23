@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Dimensions, StyleSheet } from 'react-native';
-import MapView, { Marker } from 'react-native-maps';
+import MapView, { Marker, Region } from 'react-native-maps';
 import { ServiceArea } from '../types';
 
 type MapProps = {
@@ -11,28 +11,36 @@ type MapProps = {
 };
 
 export default function Map({ myLat, myLon, serviceAreas, mapRef }: MapProps) {
+  const region: Region = {
+    latitude: myLat,
+    longitude: myLon,
+    latitudeDelta: 0.005,
+    longitudeDelta: 0.005,
+  };
+
+  useEffect(() => {
+    if (mapRef.current) {
+      mapRef.current.animateToRegion(region, 1000);
+    }
+  }, [myLat, myLon]);
+
   return (
     <MapView
       ref={mapRef}
       provider="google"
       style={styles.map}
-      initialRegion={{
-        latitude: myLat,
-        longitude: myLon,
-        latitudeDelta: 0.005,
-        longitudeDelta: 0.005,
-      }}
+      initialRegion={region}
     >
       <Marker coordinate={{ latitude: myLat, longitude: myLon }} title="現在地" pinColor="red" />
-      {serviceAreas.map((area) => (
-        <Marker
-          key={area.name}
-          coordinate={{ latitude: area.latitude, longitude: area.longitude }}
-          title={area.name}
-          description={area.description}
-          pinColor="orange"
-        />
-      ))}
+      {serviceAreas.map((store, idx) => (
+      <Marker
+        key={idx}
+        coordinate={{ latitude: store.latitude, longitude: store.longitude }}
+        title={store.name}
+        description={store.address}
+        pinColor="green"
+      />
+    ))}
     </MapView>
   );
 }

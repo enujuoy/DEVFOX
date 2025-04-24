@@ -14,6 +14,7 @@ import * as DocumentPicker from 'expo-document-picker';
 import { StackScreenProps } from '@react-navigation/stack';
 import { format } from 'date-fns';
 import { MyPageMarketStackParamList } from '../components/MyPageMarketStack';
+import { addEventToFirestore } from '../firebaseUtils/addEvent';
 
 type Props = StackScreenProps<MyPageMarketStackParamList, 'EventUpdate'>;
 
@@ -41,7 +42,7 @@ export default function EventUpdateScreen({ navigation }: Props) {
   };
 
   // 🛠 유효성 검사 추가 및 포맷
-  const onCreate = () => {
+  const onCreate = async () => {
     if (!title.trim()) {
       Alert.alert('イベント名を入力してください。');
       return;
@@ -50,18 +51,14 @@ export default function EventUpdateScreen({ navigation }: Props) {
       Alert.alert('시작일은 종료일보다 빠르거나 같아야 합니다.');
       return;
     }
-
-    const formattedStart = format(startDate, 'yyyy-MM-dd');
-    const formattedEnd = format(endDate, 'yyyy-MM-dd');
-
-    console.log('전송할 데이터:', {
-      title,
-      desc,
-      fileName,
-      period: `${formattedStart} ~ ${formattedEnd}`,
-    });
-
-    navigation.goBack();
+  
+    try {
+      await addEventToFirestore(title, desc, startDate, endDate, fileName);
+      Alert.alert('イベントが作成されました。');
+      navigation.goBack();
+    } catch (e) {
+      Alert.alert('イベント作成に失敗しました。');
+    }
   };
 
   return (

@@ -4,10 +4,11 @@ import { View, Text, StyleSheet, ScrollView, Image, Dimensions } from 'react-nat
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { HomeStackParamList } from '../components/BottomTab';
 import Header from '../components/Header';
+import { MyPageMarketStackParamList } from '../components/MyPageMarketStack';
 
 const { width } = Dimensions.get('window');
 
-type EventDetailRouteProp = RouteProp<HomeStackParamList, 'EventDetail'>;
+type EventDetailRouteProp = RouteProp<MyPageMarketStackParamList, 'EventDetail'>;
 
 const EventDetailScreen = () => {
   const route = useRoute<EventDetailRouteProp>();

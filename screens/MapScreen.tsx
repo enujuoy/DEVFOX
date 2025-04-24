@@ -32,10 +32,12 @@ export default function MapScreen() {
       // 3. 현재 위치 얻기
       const loc = await Location.getCurrentPositionAsync({});
       const { latitude, longitude } = loc.coords;
+      console.log(' 현재 위치:', latitude, longitude); 
       setLocation({ latitude, longitude });
 
       // 4. 편의점 정보 불러오기
       const nearby = await getNearbyStores(latitude, longitude);
+      console.log('🟩 편의점 목록:', JSON.stringify(nearby, null, 2));
       setStores(nearby);
 
       // 5. 편의점 정보에 대해 알림 보내기

@@ -10,6 +10,7 @@ import EventDetailScreen from '../screens/EventDetailScreen';
 import MyPageScreen_Market from '../screens/MyPageScreen_Market';
 import MyPageScreen_Market_Event from '../screens/MyPageScreen_Market_Event';
 import EventUpdateScreen from '../screens/EventUpdateScreen';
+import StoreRegisterScreen from '../screens/StoreRegisterScreen';
 
 // 타입 정의
 export type HomeStackParamList = {
@@ -19,6 +20,7 @@ export type HomeStackParamList = {
     title: string;
     image: any;
     description: string;
+    date: string;
   };
 };
 
@@ -28,6 +30,7 @@ export type EventStackParamList = {
     title: string;
     image: any;
     description: string;
+    date: string;
   };
 };
 
@@ -35,6 +38,7 @@ export type MyPageMarketStackParamList = {
   MyPageTop: undefined;
   EventManagement: undefined;
   EventUpdate: undefined;
+  StoreRegister: undefined;
 };
 
 // Stack Navigators
@@ -67,6 +71,7 @@ function MyPageMarketStackScreen() {
       <MyPageStack.Screen name="MyPageTop" component={MyPageScreen_Market} />
       <MyPageStack.Screen name="EventManagement" component={MyPageScreen_Market_Event} />
       <MyPageStack.Screen name="EventUpdate" component={EventUpdateScreen} />
+      <MyPageStack.Screen name="StoreRegister" component={StoreRegisterScreen} />
     </MyPageStack.Navigator>
   );
 }

@@ -1,16 +1,43 @@
 // screens/EventScreen.tsx
-import React from 'react';
-import {View, Text, ScrollView, StyleSheet, Image, TouchableOpacity, } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import {
+  View,
+  Text,
+  ScrollView,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+} from 'react-native';
 import Header from '../components/Header';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { HomeStackParamList } from '../components/BottomTab';
+import { db } from '../firebaseConfig';
+import { collection, getDocs } from 'firebase/firestore';
 
-// Event 스크린의 네비 프로퍼티 타입
 type EventScreenNavProp = StackNavigationProp<HomeStackParamList, 'Event'>;
 
 export default function EventScreen() {
+  const [events, setEvents] = useState<any[]>([]);
   const navigation = useNavigation<EventScreenNavProp>();
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, 'events'));
+        const eventsList = querySnapshot.docs.map((doc) => {
+          const data = doc.data();
+          const createdAt = data.createdAt ? data.createdAt.toDate() : null;
+          return { ...data, createdAt };
+        });
+        setEvents(eventsList);
+      } catch (error) {
+        console.error('Error fetching events:', error);
+      }
+    };
+
+    fetchEvents();
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -19,10 +46,7 @@ export default function EventScreen() {
 
         <Text style={styles.title}>海老名 SA</Text>
 
-        <Image
-          source={require('../assets/main.jpg')}
-          style={styles.mainImage}
-        />
+        <Image source={require('../assets/main.jpg')} style={styles.mainImage} />
 
         <View style={styles.categoryRow}>
           <TouchableOpacity style={styles.categoryButton}>
@@ -38,26 +62,25 @@ export default function EventScreen() {
 
         <Text style={styles.title}>イベント</Text>
 
-        <TouchableOpacity
-          onPress={() =>
-            navigation.navigate('EventDetail', {
-              title: '春祭り2025',
-              image: require('../assets/event1.jpg'),
-              description: '地域の文化を楽しめる年に一度の春のイベント！',
-            })
-          }
-        >
-          <View style={styles.eventCard}>
-            <Image
-              source={require('../assets/event1.jpg')}
-              style={styles.image}
-            />
-            <Text style={styles.eventTitle}>春祭り2025</Text>
-            <Text style={styles.eventDescription}>
-              地域の文化を楽しめる年に一度の春のイベント！
-            </Text>
-          </View>
-        </TouchableOpacity>
+        {events.map((event, index) => (
+          <TouchableOpacity
+            key={index}
+            onPress={() =>
+              navigation.navigate('EventDetail', {
+                title: event.title || 'イベント',
+                image: require('../assets/event1.jpg'), // 임시 이미지
+                description: event.description,
+                date: event.date || '日付未設定',
+              })
+            }
+          >
+            <View style={styles.eventCard}>
+              <Image source={require('../assets/event1.jpg')} style={styles.image} />
+              <Text style={styles.eventTitle}>{event.title || 'イベント'}</Text>
+              <Text style={styles.eventDescription}>{event.description}</Text>
+            </View>
+          </TouchableOpacity>
+        ))}
 
         <TouchableOpacity
           onPress={() =>
@@ -65,14 +88,12 @@ export default function EventScreen() {
               title: '夜市フェスティバル',
               image: require('../assets/event2.jpg'),
               description: '夜のマーケットでグルメとショッピングを満喫！',
+              date: '2025.06.01〜2025.06.10',
             })
           }
         >
           <View style={styles.eventCard}>
-            <Image
-              source={require('../assets/event2.jpg')}
-              style={styles.image}
-            />
+            <Image source={require('../assets/event2.jpg')} style={styles.image} />
             <Text style={styles.eventTitle}>夜市フェスティバル</Text>
             <Text style={styles.eventDescription}>
               夜のマーケットでグルメとショッピングを満喫！
@@ -85,43 +106,15 @@ export default function EventScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scroll: {
-    padding: 16,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginVertical: 16,
-  },
-  eventCard: {
-    marginBottom: 24,
-  },
-  image: {
-    width: '100%',
-    height: 200,
-    borderRadius: 8,
-  },
-  eventTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginTop: 8,
-  },
-  eventDescription: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 4,
-  },
-  mainImage: {
-    width: '100%',
-    height: 200,
-    resizeMode: 'cover',
-  },
-  categoryText: {
-    fontSize: 14,
-  },
+  container: { flex: 1 },
+  scroll: { padding: 16 },
+  title: { fontSize: 20, fontWeight: 'bold', marginVertical: 16 },
+  eventCard: { marginBottom: 24 },
+  image: { width: '100%', height: 200, borderRadius: 8 },
+  eventTitle: { fontSize: 18, fontWeight: 'bold', marginTop: 8 },
+  eventDescription: { fontSize: 14, color: '#666', marginTop: 4 },
+  mainImage: { width: '100%', height: 200, resizeMode: 'cover' },
+  categoryText: { fontSize: 14 },
   categoryButton: {
     backgroundColor: '#ddd',
     paddingVertical: 8,

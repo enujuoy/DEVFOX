@@ -15,7 +15,10 @@ const MyPageScreen_Market = () => {
       <Text style={styles.email}>E-Mail: 11@devfox.co.jp</Text>
 
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button}>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => navigation.navigate('StoreRegister')}
+      >
           <Image source={require('../assets/store_icon.jpg')} style={styles.icon} />
           <Text>店舗登録・管理</Text>
         </TouchableOpacity>

@@ -6,7 +6,6 @@ import AreaSelector from '../components/AreaSelector';
 import LocationSelector from '../components/LocationSelector';
 import EventCarousel from '../components/EventCarousel';
 import InfoCarousel from '../components/InfoCarousel';
-import MapShortcut from '../components/MapShortcut';
 
 export default function MainScreen() {
   return (
@@ -14,7 +13,6 @@ export default function MainScreen() {
       <ScrollView contentContainerStyle={styles.scroll}>
         <Header />
         <CategorySelector />
-        <MapShortcut />
         <AreaSelector />
         <LocationSelector />
 

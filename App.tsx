@@ -6,11 +6,16 @@ import BottomTab from './components/BottomTab';
 import CategorySettingScreen from './screens/CategorySettingScreen';
 import MapScreen from './screens/MapScreen';
 import * as Notifications from 'expo-notifications';
+import StoreDetailsScreen from './screens/StoreDetailsScreen';
 
 export type RootStackParamList = {
   MainTabs: undefined;
   CategorySetting: undefined;
   Map: undefined;
+  StoreDetails: { // 필수 추가
+    areaId: number;
+    areaName: string;
+  };
 };
 
 const RootStack = createNativeStackNavigator<RootStackParamList>();
@@ -30,6 +35,7 @@ export default function App() {
         <RootStack.Screen name="MainTabs" component={BottomTab} />
         <RootStack.Screen name="CategorySetting" component={CategorySettingScreen} />
         <RootStack.Screen name="Map" component={MapScreen} />
+        <RootStack.Screen name="StoreDetails" component={StoreDetailsScreen} />
       </RootStack.Navigator>
     </NavigationContainer>
   );

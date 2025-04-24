@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -11,11 +11,6 @@ import { menuCategories, amenityCategories } from '../constants/categoryOption';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../App';
-import { uploadCategoriesToFirestore } from '../utils/uploadCategories';
-
-useEffect(() => {
-  uploadCategoriesToFirestore();
-}, []);
 
 export default function CategorySettingScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();

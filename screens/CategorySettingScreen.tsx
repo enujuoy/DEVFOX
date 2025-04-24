@@ -1,40 +1,38 @@
 import React, { useEffect, useState } from 'react';
 import {
-  View,
-  Text,
-  TouchableOpacity,
-  ScrollView,
-  StyleSheet,
+  View, Text, TouchableOpacity, ScrollView, StyleSheet,
 } from 'react-native';
 import ToggleButton from '../components/ToggleButton';
 import { menuCategories, amenityCategories } from '../constants/categoryOption';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../App';
-import { uploadCategoriesToFirestore } from '../utils/uploadCategories';
+import { initializeCategoriesInFirestore } from '../utils/initCategories';
+import { saveSelectedCategories } from '../utils/saveSelectedCategories';
 
 export default function CategorySettingScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-
   const [activeTab, setActiveTab] = useState<'menu' | 'amenity'>('menu');
   const [selected, setSelected] = useState<string[]>([]);
 
-  useEffect(() => {
-    uploadCategoriesToFirestore();
-  }, []);
-  
   const categories = activeTab === 'menu' ? menuCategories : amenityCategories;
+
+  useEffect(() => {
+    initializeCategoriesInFirestore(); // 앱 처음 로딩 시 한 번만 실행
+  }, []);
 
   const toggleCategory = (item: string) => {
     setSelected((prev) =>
-      prev.includes(item)
-        ? prev.filter((i) => i !== item)
-        : [...prev, item]
+      prev.includes(item) ? prev.filter((i) => i !== item) : [...prev, item]
     );
   };
 
-  const handleSubmit = () => {
-    console.log('選択カテゴリ:', selected);
+  const handleSubmit = async () => {
+    if (activeTab === 'menu') {
+      await saveSelectedCategories({ selectedMenus: selected });
+    } else {
+      await saveSelectedCategories({ selectedAmenities: selected });
+    }
     navigation.navigate('Map');
   };
 
@@ -92,23 +90,10 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     backgroundColor: '#fff',
   },
-  activeTab: {
-    backgroundColor: '#eee',
-    borderColor: '#666',
-  },
+  activeTab: { backgroundColor: '#eee', borderColor: '#666' },
   tabText: { fontSize: 15 },
-  subTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    textAlign: 'center',
-    marginVertical: 8,
-  },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    paddingBottom: 80,
-  },
+  subTitle: { fontSize: 16, fontWeight: '600', textAlign: 'center', marginVertical: 8 },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', paddingBottom: 80 },
   submitButton: {
     position: 'absolute',
     bottom: 30,
@@ -120,8 +105,5 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     alignItems: 'center',
   },
-  submitText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
+  submitText: { fontSize: 16, fontWeight: 'bold' },
 });

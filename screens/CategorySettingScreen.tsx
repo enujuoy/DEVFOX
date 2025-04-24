@@ -13,16 +13,16 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../App';
 import { uploadCategoriesToFirestore } from '../utils/uploadCategories';
 
-useEffect(() => {
-  uploadCategoriesToFirestore();
-}, []);
-
 export default function CategorySettingScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const [activeTab, setActiveTab] = useState<'menu' | 'amenity'>('menu');
   const [selected, setSelected] = useState<string[]>([]);
 
+  useEffect(() => {
+    uploadCategoriesToFirestore();
+  }, []);
+  
   const categories = activeTab === 'menu' ? menuCategories : amenityCategories;
 
   const toggleCategory = (item: string) => {

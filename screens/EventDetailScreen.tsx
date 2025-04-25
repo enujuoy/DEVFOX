@@ -1,14 +1,12 @@
-// screens/EventDetailScreen.tsx
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, Image, Dimensions } from 'react-native';
 import { RouteProp, useRoute } from '@react-navigation/native';
-import { HomeStackParamList } from '../components/BottomTab';
+import { EventStackParamList } from '../components/BottomTab'; // 혹은 정의된 위치
 import Header from '../components/Header';
-import { MyPageMarketStackParamList } from '../components/MyPageMarketStack';
 
 const { width } = Dimensions.get('window');
 
-type EventDetailRouteProp = RouteProp<MyPageMarketStackParamList, 'EventDetail'>;
+type EventDetailRouteProp = RouteProp<EventStackParamList, 'EventDetail'>;
 
 const EventDetailScreen = () => {
   const route = useRoute<EventDetailRouteProp>();
@@ -18,13 +16,9 @@ const EventDetailScreen = () => {
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scroll}>
         <Header />
-
         <Text style={styles.title}>{title}</Text>
-
         <Image source={image} style={styles.image} resizeMode="contain" />
-
         <Text style={styles.date}>{date}</Text>
-
         <Text style={styles.description}>{description}</Text>
       </ScrollView>
     </View>

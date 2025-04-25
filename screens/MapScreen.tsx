@@ -1,5 +1,12 @@
+// 🔹 screens/MapScreen.tsx
 import React, { useEffect, useRef, useState } from 'react';
-import { View, StyleSheet, Animated, Text, ActivityIndicator } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  Text,
+  ActivityIndicator,
+  TextInput,
+} from 'react-native';
 import * as Location from 'expo-location';
 import * as Notifications from 'expo-notifications';
 import MapView from 'react-native-maps';
@@ -11,39 +18,42 @@ import { notifyNearbyStores } from '../utils/sendStoreNotifications';
 export default function MapScreen() {
   const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [stores, setStores] = useState<any[]>([]);
+  const [radius, setRadius] = useState(1000);
   const mapRef = useRef<MapView>(null);
+
+  const fetchStores = async (lat: number, lon: number, selectedRadius: number) => {
+    const nearby = await getNearbyStores(lat, lon, selectedRadius);
+    setStores(nearby);
+    await notifyNearbyStores(nearby);
+  };
 
   useEffect(() => {
     (async () => {
-      // 1. 알림 권한 요청
       const { status: notifStatus } = await Notifications.requestPermissionsAsync();
       if (notifStatus !== 'granted') {
         alert('通知の許可が必要です');
         return;
       }
 
-      // 2. 위치 권한 요청
       const { status: locStatus } = await Location.requestForegroundPermissionsAsync();
       if (locStatus !== 'granted') {
         alert('位置情報の許可が必要です');
         return;
       }
 
-      // 3. 현재 위치 얻기
       const loc = await Location.getCurrentPositionAsync({});
       const { latitude, longitude } = loc.coords;
-      console.log(' 현재 위치:', latitude, longitude); 
       setLocation({ latitude, longitude });
 
-      // 4. 편의점 정보 불러오기
-      const nearby = await getNearbyStores(latitude, longitude);
-      console.log('🟩 편의점 목록:', JSON.stringify(nearby, null, 2));
-      setStores(nearby);
-
-      // 5. 편의점 정보에 대해 알림 보내기
-      await notifyNearbyStores(nearby);
+      await fetchStores(latitude, longitude, radius);
     })();
   }, []);
+
+  useEffect(() => {
+    if (location) {
+      fetchStores(location.latitude, location.longitude, radius);
+    }
+  }, [radius]);
 
   if (!location) {
     return (
@@ -56,6 +66,18 @@ export default function MapScreen() {
 
   return (
     <View style={styles.container}>
+      {/* 🔹 지도 위 오른쪽 상단 거리 입력창 */}
+      <TextInput
+        style={styles.floatingInput}
+        keyboardType="numeric"
+        value={radius.toString()}
+        onChangeText={(text) => {
+          const num = parseInt(text);
+          if (!isNaN(num)) setRadius(num);
+        }}
+        placeholder="반경(m)"
+      />
+
       <CustomMap
         myLat={location.latitude}
         myLon={location.longitude}
@@ -72,5 +94,19 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  floatingInput: {
+    position: 'absolute',
+    top: 40,
+    right: 20,
+    height: 36,
+    width: 100,
+    backgroundColor: '#ffffffcc',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    fontSize: 13,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    zIndex: 999,
   },
 });

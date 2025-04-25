@@ -128,5 +128,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     alignItems: 'center',
   },
-  submitText: { fontSize: 16, fontWeight: 'bold' },
+  submitText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
 });

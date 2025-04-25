@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import {
-  View, Text, TouchableOpacity, ScrollView, StyleSheet,
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  StyleSheet,
 } from 'react-native';
 import ToggleButton from '../components/ToggleButton';
 import { menuCategories, amenityCategories } from '../constants/categoryOption';
@@ -10,30 +14,43 @@ import { RootStackParamList } from '../App';
 import { initializeCategoriesInFirestore } from '../utils/initCategories';
 import { saveSelectedCategories } from '../utils/saveSelectedCategories';
 
-
 export default function CategorySettingScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
   const [activeTab, setActiveTab] = useState<'menu' | 'amenity'>('menu');
-  const [selected, setSelected] = useState<string[]>([]);
+  const [menuSelected, setMenuSelected] = useState<string[]>([]);
+  const [amenitySelected, setAmenitySelected] = useState<string[]>([]);
 
   const categories = activeTab === 'menu' ? menuCategories : amenityCategories;
+  const selected = activeTab === 'menu' ? menuSelected : amenitySelected;
 
   useEffect(() => {
-    initializeCategoriesInFirestore(); // 앱 처음 로딩 시 한 번만 실행
+    initializeCategoriesInFirestore(); // 앱 최초 실행 시 1회만 실행
   }, []);
 
   const toggleCategory = (item: string) => {
-    setSelected((prev) =>
-      prev.includes(item) ? prev.filter((i) => i !== item) : [...prev, item]
-    );
+    if (activeTab === 'menu') {
+      setMenuSelected((prev) =>
+        prev.includes(item) ? prev.filter((i) => i !== item) : [...prev, item]
+      );
+    } else {
+      setAmenitySelected((prev) =>
+        prev.includes(item) ? prev.filter((i) => i !== item) : [...prev, item]
+      );
+    }
   };
 
   const handleSubmit = async () => {
-    if (activeTab === 'menu') {
-      await saveSelectedCategories({ selectedMenus: selected });
-    } else {
-      await saveSelectedCategories({ selectedAmenities: selected });
-    }
+    await saveSelectedCategories({
+      selectedMenus: menuSelected,
+      selectedAmenities: amenitySelected,
+    });
+
+    console.log('✅ 저장됨:', {
+      selectedMenus: menuSelected,
+      selectedAmenities: amenitySelected,
+    });
+
     navigation.navigate('Map');
   };
 
@@ -94,7 +111,12 @@ const styles = StyleSheet.create({
   activeTab: { backgroundColor: '#eee', borderColor: '#666' },
   tabText: { fontSize: 15 },
   subTitle: { fontSize: 16, fontWeight: '600', textAlign: 'center', marginVertical: 8 },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', paddingBottom: 80 },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    paddingBottom: 80,
+  },
   submitButton: {
     position: 'absolute',
     bottom: 30,

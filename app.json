@@ -3,7 +3,7 @@
     "android": {
       "config": {
         "googleMaps": {
-          "apiKey": "AIzaSyCtKlGNR5dAi0kvR7gwNEr91FgMgU-7qZE"
+          "apiKey": "your_apikey"
         }
       },
       "adaptiveIcon": {
@@ -31,6 +31,7 @@
       "favicon": "./assets/favicon.png"
     },
     "extra": {    
+      "googleMapsApiKey": "your_apikey",
       "eas": {
         "projectId": "545e139a-93de-448a-8942-4472b6ce2d26"
       }

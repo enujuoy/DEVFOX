@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View, Text, TouchableOpacity, ScrollView, StyleSheet,
 } from 'react-native';
@@ -7,11 +7,9 @@ import { menuCategories, amenityCategories } from '../constants/categoryOption';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../App';
-<<<<<<< HEAD
-=======
 import { initializeCategoriesInFirestore } from '../utils/initCategories';
 import { saveSelectedCategories } from '../utils/saveSelectedCategories';
->>>>>>> 57c939da1084858288840fd8fc0aa5ca6577f682
+
 
 export default function CategorySettingScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -108,13 +106,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     alignItems: 'center',
   },
-<<<<<<< HEAD
   submitText: {
     fontSize: 16,
     fontWeight: 'bold',
   },
 });
-=======
-  submitText: { fontSize: 16, fontWeight: 'bold' },
-});
->>>>>>> 57c939da1084858288840fd8fc0aa5ca6577f682

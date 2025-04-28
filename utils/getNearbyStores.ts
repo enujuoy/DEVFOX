@@ -1,4 +1,3 @@
-// 🔹 utils/getNearbyStores.ts
 import Constants from 'expo-constants';
 
 export const getNearbyStores = async (lat: number, lon: number, radius: number = 1000) => {

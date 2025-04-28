@@ -13,8 +13,14 @@ export type RootStackParamList = {
   CategorySetting: undefined;
   Map: undefined;
   StoreDetails: { // 필수 추가
-    areaId: number;
-    areaName: string;
+    storeCode: string;
+    name: string;
+  };
+  EventDetail: { // ✅ 추가
+    title: string;
+    description: string;
+    image?: string;
+    date?: any;
   };
 };
 

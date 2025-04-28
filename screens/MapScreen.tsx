@@ -1,31 +1,79 @@
-// 🔹 screens/MapScreen.tsx
+// screens/MapScreen.tsx
+
 import React, { useEffect, useRef, useState } from 'react';
-import {
-  View,
-  StyleSheet,
-  Text,
-  ActivityIndicator,
-  TextInput,
-} from 'react-native';
+import { View, StyleSheet, Text, ActivityIndicator, Animated } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import * as Location from 'expo-location';
 import * as Notifications from 'expo-notifications';
 import MapView from 'react-native-maps';
 
-import CustomMap from '../components/Map';
-import { getNearbyStores } from '../utils/getNearbyStores';
-import { notifyNearbyStores } from '../utils/sendStoreNotifications';
+import useNearbyStores from '../utils/useNearbyStores';
+import MapWithInputs from '../components/MapWithInputs';
+import PopupMessage from '../components/Popup';
 
 export default function MapScreen() {
+  const navigation = useNavigation<any>();
   const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
-  const [stores, setStores] = useState<any[]>([]);
   const [radius, setRadius] = useState(1000);
   const mapRef = useRef<MapView>(null);
 
-  const fetchStores = async (lat: number, lon: number, selectedRadius: number) => {
-    const nearby = await getNearbyStores(lat, lon, selectedRadius);
-    setStores(nearby);
-    await notifyNearbyStores(nearby);
+  const {
+    stores,
+    popupText,
+    popupVisible,
+    highlight,
+    fetchStores,
+    eventPopupText,
+    eventPopupVisible,
+    selectedStore,
+    selectedEvent,
+  } = useNearbyStores(location?.latitude ?? 0, location?.longitude ?? 0, radius);
+
+  // 기본 팝업 애니메이션
+  const popupOpacity = useRef(new Animated.Value(0)).current;
+  const popupTranslateY = useRef(new Animated.Value(50)).current;
+
+  // 이벤트 팝업 애니메이션
+  const eventPopupOpacity = useRef(new Animated.Value(0)).current;
+  const eventPopupTranslateY = useRef(new Animated.Value(50)).current;
+
+  const showPopup = () => {
+    Animated.parallel([
+      Animated.timing(popupOpacity, { toValue: 1, duration: 300, useNativeDriver: true }),
+      Animated.timing(popupTranslateY, { toValue: 0, duration: 300, useNativeDriver: true }),
+    ]).start();
   };
+
+  const hidePopupAnimated = () => {
+    Animated.parallel([
+      Animated.timing(popupOpacity, { toValue: 0, duration: 300, useNativeDriver: true }),
+      Animated.timing(popupTranslateY, { toValue: 50, duration: 300, useNativeDriver: true }),
+    ]).start();
+  };
+
+  const showEventPopup = () => {
+    Animated.parallel([
+      Animated.timing(eventPopupOpacity, { toValue: 1, duration: 300, useNativeDriver: true }),
+      Animated.timing(eventPopupTranslateY, { toValue: 0, duration: 300, useNativeDriver: true }),
+    ]).start();
+  };
+
+  const hideEventPopupAnimated = () => {
+    Animated.parallel([
+      Animated.timing(eventPopupOpacity, { toValue: 0, duration: 300, useNativeDriver: true }),
+      Animated.timing(eventPopupTranslateY, { toValue: 50, duration: 300, useNativeDriver: true }),
+    ]).start();
+  };
+
+  useEffect(() => {
+    if (popupVisible) showPopup();
+    else hidePopupAnimated();
+  }, [popupVisible]);
+
+  useEffect(() => {
+    if (eventPopupVisible) showEventPopup();
+    else hideEventPopupAnimated();
+  }, [eventPopupVisible]);
 
   useEffect(() => {
     (async () => {
@@ -34,26 +82,49 @@ export default function MapScreen() {
         alert('通知の許可が必要です');
         return;
       }
-
       const { status: locStatus } = await Location.requestForegroundPermissionsAsync();
       if (locStatus !== 'granted') {
         alert('位置情報の許可が必要です');
         return;
       }
-
       const loc = await Location.getCurrentPositionAsync({});
-      const { latitude, longitude } = loc.coords;
-      setLocation({ latitude, longitude });
-
-      await fetchStores(latitude, longitude, radius);
+      setLocation({ latitude: loc.coords.latitude, longitude: loc.coords.longitude });
     })();
   }, []);
 
   useEffect(() => {
     if (location) {
-      fetchStores(location.latitude, location.longitude, radius);
+      fetchStores();
     }
-  }, [radius]);
+  }, [location, radius]);
+
+  // ✅ 편의점 팝업 터치
+  const handleStorePress = () => {
+    if (selectedStore) {
+      navigation.navigate('StoreDetails', {
+        screen: 'StoreDetails',
+        params: {
+          storeCode: selectedStore.storeCode,
+          name: selectedStore.name,
+        },
+      });
+    }
+  };
+
+  // ✅ 이벤트 팝업 터치
+  const handleEventPress = () => {
+    if (selectedEvent) {
+      navigation.navigate('EventDetail', {
+        screen: 'EventDetail',
+        params: {
+          title: selectedEvent.title,
+          description: selectedEvent.description,
+          image: selectedEvent.image ?? require('../assets/event1.jpg'), // 🔥 event1.jpg 기본
+          date: selectedEvent.date || '', // 🔥 빈 문자열
+        },
+      });
+    }
+  };
 
   if (!location) {
     return (
@@ -66,47 +137,38 @@ export default function MapScreen() {
 
   return (
     <View style={styles.container}>
-      {/* 🔹 지도 위 오른쪽 상단 거리 입력창 */}
-      <TextInput
-        style={styles.floatingInput}
-        keyboardType="numeric"
-        value={radius.toString()}
-        onChangeText={(text) => {
-          const num = parseInt(text);
-          if (!isNaN(num)) setRadius(num);
-        }}
-        placeholder="반경(m)"
-      />
-
-      <CustomMap
-        myLat={location.latitude}
-        myLon={location.longitude}
-        serviceAreas={stores}
+      <MapWithInputs
+        location={location}
+        radius={radius}
+        setRadius={setRadius}
+        stores={stores}
         mapRef={mapRef}
       />
+
+      {popupVisible && (
+        <PopupMessage
+          text={popupText}
+          opacity={popupOpacity}
+          translateY={popupTranslateY}
+          type={highlight ? 'highlight' : 'normal'}
+          onPress={handleStorePress}
+        />
+      )}
+
+      {eventPopupVisible && (
+        <PopupMessage
+          text={eventPopupText}
+          opacity={eventPopupOpacity}
+          translateY={eventPopupTranslateY}
+          type="event"
+          onPress={handleEventPress}
+        />
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  loading: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  floatingInput: {
-    position: 'absolute',
-    top: 40,
-    right: 20,
-    height: 36,
-    width: 100,
-    backgroundColor: '#ffffffcc',
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    fontSize: 13,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    zIndex: 999,
-  },
+  loading: { flex: 1, justifyContent: 'center', alignItems: 'center' },
 });

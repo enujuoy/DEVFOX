@@ -22,6 +22,7 @@ export type HomeStackParamList = {
     description: string;
     date: string;
   };
+  ServiceAreaInfoScreen: undefined;
 };
 
 export type EventStackParamList = {

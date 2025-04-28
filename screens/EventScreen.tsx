@@ -52,14 +52,16 @@ export default function EventScreen() {
           <TouchableOpacity style={styles.categoryButton}>
             <Text style={styles.categoryText}>EVENTS</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.categoryButton}>
-            <Text style={styles.categoryText}>サービスエリア</Text>
+          <TouchableOpacity 
+            style={styles.categoryButton}
+            onPress={() => navigation.navigate('ServiceAreaInfoScreen')}
+          >
+            <Text style={styles.categoryText}>店舗</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.categoryButton}>
             <Text style={styles.categoryText}>情報</Text>
           </TouchableOpacity>
         </View>
-
         <Text style={styles.title}>イベント</Text>
 
         {events.map((event, index) => (

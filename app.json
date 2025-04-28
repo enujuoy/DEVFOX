@@ -13,10 +13,12 @@
       "backgroundColor": "#ffffff"
     },
     "android": {
-      "permissions": ["INTERNET"],  
+      "permissions": [
+        "INTERNET"
+      ],
       "config": {
         "googleMaps": {
-          "apiKey": "AIzaSyXXX_REAL_KEY_HERE"  
+          "apiKey": "AIzaSyCtKlGNR5dAi0kvR7gwNEr91FgMgU-7qZE"
         }
       },
       "adaptiveIcon": {
@@ -32,9 +34,9 @@
       "favicon": "./assets/favicon.png"
     },
     "extra": {
-      "googleMapsApiKey": "AIzaSyXXX_REAL_KEY_HERE",  
+      "googleMapsApiKey": "AIzaSyCtKlGNR5dAi0kvR7gwNEr91FgMgU-7qZE",
       "eas": {
-        "projectId": "545e139a-93de-448a-8942-4472b6ce2d26"
+        "projectId": "ee43b60e-5eec-407c-87b2-cd4a4aedf284"
       }
     }
   }

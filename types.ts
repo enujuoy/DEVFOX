@@ -1,11 +1,12 @@
 // types.ts
-
 export type ServiceArea = {
   name: string;
   address: string;
   latitude: number;
   longitude: number;
-  description: string; // ✅ 반드시 있어야 함
+  description: string;
+  serviceAreaCode: string;
+  storeCode: string;
 };
 
 export type Location = {
@@ -25,20 +26,17 @@ export type StoreEvent = {
   title: string;
   description: string;
   image?: string;
-  date: number;
+  date?: any;
 };
 
 export type StoreWithDetails = NearbyStore & {
   description: string;
   amenities?: string[];
   menu?: string[];
-  event?: {
-    title: string;
-    description: string;
-    image?: string;
-    date?: any;
-  };
-  storeCode: string; // ✅ storeCode 추가
+  event?: StoreEvent;
+  serviceAreaCode?: string;
+  storeCode?: string;
+  name? : string;
 };
 
 export type UserPreferences = {

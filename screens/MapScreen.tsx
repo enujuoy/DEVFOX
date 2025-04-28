@@ -1,5 +1,4 @@
 // screens/MapScreen.tsx
-
 import React, { useEffect, useRef, useState } from 'react';
 import { View, StyleSheet, Text, ActivityIndicator, Animated } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -29,11 +28,9 @@ export default function MapScreen() {
     selectedEvent,
   } = useNearbyStores(location?.latitude ?? 0, location?.longitude ?? 0, radius);
 
-  // 기본 팝업 애니메이션
   const popupOpacity = useRef(new Animated.Value(0)).current;
   const popupTranslateY = useRef(new Animated.Value(50)).current;
 
-  // 이벤트 팝업 애니메이션
   const eventPopupOpacity = useRef(new Animated.Value(0)).current;
   const eventPopupTranslateY = useRef(new Animated.Value(50)).current;
 
@@ -98,30 +95,22 @@ export default function MapScreen() {
     }
   }, [location, radius]);
 
-  // ✅ 편의점 팝업 터치
   const handleStorePress = () => {
     if (selectedStore) {
       navigation.navigate('StoreDetails', {
-        screen: 'StoreDetails',
-        params: {
-          storeCode: selectedStore.storeCode,
-          name: selectedStore.name,
-        },
+        storeCode: selectedStore.storeCode ?? '',
+        areaName: selectedStore.name ?? '',
       });
     }
   };
 
-  // ✅ 이벤트 팝업 터치
   const handleEventPress = () => {
     if (selectedEvent) {
       navigation.navigate('EventDetail', {
-        screen: 'EventDetail',
-        params: {
-          title: selectedEvent.title,
-          description: selectedEvent.description,
-          image: selectedEvent.image ?? require('../assets/event1.jpg'), // 🔥 event1.jpg 기본
-          date: selectedEvent.date || '', // 🔥 빈 문자열
-        },
+        title: selectedEvent.title,
+        description: selectedEvent.description,
+        image: selectedEvent.image,
+        date: selectedEvent.date,
       });
     }
   };

@@ -162,7 +162,6 @@ export default function useNearbyStores(lat: number, lon: number, radius: number
           menu,
           event,
           storeCode,
-          areaId: storeSnap.docs[0].id, // Firestore 문서 ID를 areaId로 사용
         };
       })
     );

@@ -1,12 +1,12 @@
 import React, { useEffect } from 'react';
 import { Dimensions, StyleSheet } from 'react-native';
 import MapView, { Marker, Region } from 'react-native-maps';
-import { ServiceArea } from '../types';
+import { StoreWithDetails } from '../types';
 
 type MapProps = {
   myLat: number;
   myLon: number;
-  serviceAreas: ServiceArea[];
+  serviceAreas: StoreWithDetails[]; // ✅ 여기!! ServiceArea[] → StoreWithDetails[]
   mapRef: React.RefObject<MapView>;
 };
 

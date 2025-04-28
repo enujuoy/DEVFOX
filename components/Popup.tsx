@@ -1,22 +1,26 @@
+// components/Popup.tsx
 import React from 'react';
-import { Animated, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { Animated, Text, StyleSheet } from 'react-native';
 
 type PopupProps = {
   text: string;
   opacity?: Animated.Value;
   translateY?: Animated.Value;
   type: 'normal' | 'highlight' | 'event';
-  onPress?: () => void; // 🔥 추가
+  onPress?: () => void;
 };
 
 export default function Popup({ text, opacity, translateY, type, onPress }: PopupProps) {
+  const isHighlight = type === 'highlight';
+  const isEvent = type === 'event';
+
   return (
     <Animated.View
       style={[
-        type === 'event'
-          ? styles.popupEvent
-          : type === 'highlight'
+        isHighlight
           ? styles.popupYellow
+          : isEvent
+          ? styles.popupBlue
           : styles.popupWhite,
         {
           opacity: opacity ?? new Animated.Value(1),
@@ -24,9 +28,9 @@ export default function Popup({ text, opacity, translateY, type, onPress }: Popu
         },
       ]}
     >
-      <TouchableOpacity activeOpacity={0.8} onPress={onPress}> {/* 🔥 눌렀을 때 동작 */}
-        <Text style={styles.popupText}>{text}</Text>
-      </TouchableOpacity>
+      <Text onPress={onPress} style={styles.popupText}>
+        {text}
+      </Text>
     </Animated.View>
   );
 }
@@ -37,7 +41,7 @@ const styles = StyleSheet.create({
     bottom: 100,
     left: 20,
     right: 20,
-    backgroundColor: '#ffffff99',
+    backgroundColor: '#ffffffcc',
     padding: 14,
     borderRadius: 12,
     borderWidth: 1,
@@ -59,29 +63,29 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 1,
     borderColor: '#aaa',
-    zIndex: 998,
+    zIndex: 999,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 3,
     elevation: 5,
   },
-  popupEvent: {
+  popupBlue: {
     position: 'absolute',
-    bottom: 200,
+    bottom: 150,
     left: 20,
     right: 20,
-    backgroundColor: '#fff2b2cc',
-    padding: 16,
+    backgroundColor: '#cce5ff',
+    padding: 14,
     borderRadius: 12,
     borderWidth: 1,
     borderColor: '#aaa',
-    zIndex: 1000,
+    zIndex: 999,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 3,
-    elevation: 6,
+    elevation: 5,
   },
   popupText: {
     fontSize: 15,

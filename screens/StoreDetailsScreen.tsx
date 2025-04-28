@@ -25,7 +25,7 @@ const MenuItem = ({ name, price }: MenuItemProps) => (
   </View>
 );
 
-const StoreDetailsScreen = () => {
+export default function StoreDetailsScreen() {
   const { storeCode, areaName } = useRoute<StoreDetailsRouteProp>().params;
   const [menuItems, setMenuItems] = useState<MenuItemData[]>([]);
 
@@ -37,7 +37,6 @@ const StoreDetailsScreen = () => {
           where('storeCode', '==', storeCode),
           orderBy('createdAt', 'desc')
         );
-
         const snapshot = await getDocs(q);
         const items = snapshot.docs.map(doc => {
           const data = doc.data();
@@ -46,7 +45,6 @@ const StoreDetailsScreen = () => {
             price: data.price,
           };
         });
-
         setMenuItems(items);
       } catch (error) {
         console.error('メニュー取得エラー:', error);
@@ -59,14 +57,16 @@ const StoreDetailsScreen = () => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.header}>{areaName} メニュー一覧</Text>
-      {menuItems.map((item, idx) => (
-        <MenuItem key={idx} name={item.productName} price={item.price} />
-      ))}
+      {menuItems.length > 0 ? (
+        menuItems.map((item, idx) => (
+          <MenuItem key={idx} name={item.productName} price={item.price} />
+        ))
+      ) : (
+        <Text style={styles.noMenuText}>メニューが登録されていません</Text>
+      )}
     </ScrollView>
   );
-};
-
-export default StoreDetailsScreen;
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -91,5 +91,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     marginTop: 4,
+  },
+  noMenuText: {
+    fontSize: 16,
+    color: '#888',
+    textAlign: 'center',
+    marginTop: 30,
   },
 });

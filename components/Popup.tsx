@@ -1,37 +1,42 @@
 // components/Popup.tsx
+
 import React from 'react';
-import { Animated, Text, StyleSheet } from 'react-native';
+import { Animated, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
 type PopupProps = {
   text: string;
   opacity?: Animated.Value;
   translateY?: Animated.Value;
   type: 'normal' | 'highlight' | 'event';
-  onPress?: () => void;
+  onPress?: () => void; // ✅ 클릭 핸들러 추가
 };
+
+const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
 
 export default function Popup({ text, opacity, translateY, type, onPress }: PopupProps) {
   const isHighlight = type === 'highlight';
   const isEvent = type === 'event';
 
+  const popupStyle = isHighlight
+    ? styles.popupYellow
+    : isEvent
+    ? styles.popupBlue
+    : styles.popupWhite;
+
   return (
-    <Animated.View
+    <AnimatedTouchable
+      activeOpacity={0.8}
+      onPress={onPress}
       style={[
-        isHighlight
-          ? styles.popupYellow
-          : isEvent
-          ? styles.popupBlue
-          : styles.popupWhite,
+        popupStyle,
         {
           opacity: opacity ?? new Animated.Value(1),
           transform: [{ translateY: translateY ?? new Animated.Value(0) }],
         },
       ]}
     >
-      <Text onPress={onPress} style={styles.popupText}>
-        {text}
-      </Text>
-    </Animated.View>
+      <Text style={styles.popupText}>{text}</Text>
+    </AnimatedTouchable>
   );
 }
 
@@ -58,7 +63,7 @@ const styles = StyleSheet.create({
     bottom: 100,
     left: 20,
     right: 20,
-    backgroundColor: '#fff89a99',
+    backgroundColor: '#fff89acc',
     padding: 14,
     borderRadius: 12,
     borderWidth: 1,
@@ -72,15 +77,15 @@ const styles = StyleSheet.create({
   },
   popupBlue: {
     position: 'absolute',
-    bottom: 150,
+    bottom: 200,
     left: 20,
     right: 20,
-    backgroundColor: '#cce5ff',
+    backgroundColor: '#add8e699',
     padding: 14,
     borderRadius: 12,
     borderWidth: 1,
     borderColor: '#aaa',
-    zIndex: 999,
+    zIndex: 1000,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,

@@ -1,31 +1,39 @@
+// screens/EventDetailScreen.tsx
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, Image, Dimensions } from 'react-native';
-import { RouteProp, useRoute } from '@react-navigation/native';
-import { EventStackParamList } from '../components/BottomTab'; // 혹은 정의된 위치
-import Header from '../components/Header';
+import { useRoute, RouteProp } from '@react-navigation/native';
+import { RootStackParamList } from '../App';
 
 const { width } = Dimensions.get('window');
 
-type EventDetailRouteProp = RouteProp<EventStackParamList, 'EventDetail'>;
+type EventDetailRouteProp = RouteProp<RootStackParamList, 'EventDetail'>;
 
-const EventDetailScreen = () => {
-  const route = useRoute<EventDetailRouteProp>();
-  const { title, image, description, date } = route.params;
+export default function EventDetailScreen() {
+  const { title, description, image, date } = useRoute<EventDetailRouteProp>().params;
 
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scroll}>
-        <Header />
         <Text style={styles.title}>{title}</Text>
-        <Image source={image} style={styles.image} resizeMode="contain" />
-        <Text style={styles.date}>{date}</Text>
+
+        {/* 이미지가 있을 때만 표시 */}
+        {image && (
+          <Image
+            source={typeof image === 'string' ? { uri: image } : image}
+            style={styles.image}
+            resizeMode="contain"
+          />
+        )}
+
+        {/* 날짜 */}
+        <Text style={styles.date}>{date ? new Date(date.seconds * 1000).toLocaleString() : ''}</Text>
+
+        {/* 설명 */}
         <Text style={styles.description}>{description}</Text>
       </ScrollView>
     </View>
   );
-};
-
-export default EventDetailScreen;
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -50,7 +58,9 @@ const styles = StyleSheet.create({
   },
   date: {
     fontSize: 13,
+    color: '#888',
     marginBottom: 10,
+    textAlign: 'center',
   },
   description: {
     fontSize: 14,

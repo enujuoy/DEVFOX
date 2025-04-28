@@ -1,7 +1,8 @@
 // screens/MapScreen.tsx
+
 import React, { useEffect, useRef, useState } from 'react';
 import { View, StyleSheet, Text, ActivityIndicator, Animated } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, CommonActions } from '@react-navigation/native';
 import * as Location from 'expo-location';
 import * as Notifications from 'expo-notifications';
 import MapView from 'react-native-maps';
@@ -9,9 +10,11 @@ import MapView from 'react-native-maps';
 import useNearbyStores from '../utils/useNearbyStores';
 import MapWithInputs from '../components/MapWithInputs';
 import PopupMessage from '../components/Popup';
+import { RootStackParamList } from '../App';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 export default function MapScreen() {
-  const navigation = useNavigation<any>();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [radius, setRadius] = useState(1000);
   const mapRef = useRef<MapView>(null);
@@ -30,7 +33,6 @@ export default function MapScreen() {
 
   const popupOpacity = useRef(new Animated.Value(0)).current;
   const popupTranslateY = useRef(new Animated.Value(50)).current;
-
   const eventPopupOpacity = useRef(new Animated.Value(0)).current;
   const eventPopupTranslateY = useRef(new Animated.Value(50)).current;
 
@@ -74,18 +76,23 @@ export default function MapScreen() {
 
   useEffect(() => {
     (async () => {
-      const { status: notifStatus } = await Notifications.requestPermissionsAsync();
-      if (notifStatus !== 'granted') {
-        alert('通知の許可が必要です');
-        return;
+      try {
+        const { status: notifStatus } = await Notifications.requestPermissionsAsync();
+        if (notifStatus !== 'granted') {
+          alert('通知の許可が必要です');
+          return;
+        }
+        const { status: locStatus } = await Location.requestForegroundPermissionsAsync();
+        if (locStatus !== 'granted') {
+          alert('位置情報の許可が必要です');
+          return;
+        }
+        const loc = await Location.getCurrentPositionAsync({});
+        setLocation({ latitude: loc.coords.latitude, longitude: loc.coords.longitude });
+      } catch (error) {
+        console.error('位置情報取得エラー:', error);
+        alert('位置情報の取得に失敗しました');
       }
-      const { status: locStatus } = await Location.requestForegroundPermissionsAsync();
-      if (locStatus !== 'granted') {
-        alert('位置情報の許可が必要です');
-        return;
-      }
-      const loc = await Location.getCurrentPositionAsync({});
-      setLocation({ latitude: loc.coords.latitude, longitude: loc.coords.longitude });
     })();
   }, []);
 
@@ -95,23 +102,35 @@ export default function MapScreen() {
     }
   }, [location, radius]);
 
+  // ✅ 편의점 팝업 클릭 핸들러
   const handleStorePress = () => {
     if (selectedStore) {
-      navigation.navigate('StoreDetails', {
-        storeCode: selectedStore.storeCode ?? '',
-        areaName: selectedStore.name ?? '',
-      });
+      navigation.dispatch(
+        CommonActions.navigate({
+          name: 'StoreDetails',
+          params: {
+            storeCode: selectedStore.storeCode ?? '',
+            areaName: selectedStore.name,
+          },
+        })
+      );
     }
   };
 
+  // ✅ 이벤트 팝업 클릭 핸들러
   const handleEventPress = () => {
     if (selectedEvent) {
-      navigation.navigate('EventDetail', {
-        title: selectedEvent.title,
-        description: selectedEvent.description,
-        image: selectedEvent.image,
-        date: selectedEvent.date,
-      });
+      navigation.dispatch(
+        CommonActions.navigate({
+          name: 'EventDetail',
+          params: {
+            title: selectedEvent.title,
+            description: selectedEvent.description,
+            image: selectedEvent.image ?? require('../assets/event1.jpg'),
+            date: selectedEvent.date ?? '',
+          },
+        })
+      );
     }
   };
 

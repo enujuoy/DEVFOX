@@ -1,15 +1,16 @@
 // components/MapWithInputs.tsx
+
 import React from 'react';
-import { View, StyleSheet, TextInput } from 'react-native';
-import Map from './Map';
+import { View, TextInput, StyleSheet } from 'react-native';
 import MapView from 'react-native-maps';
-import { StoreWithDetails } from '../types'; // ✅ 타입 수정
+import Map from './Map';
+import { StoreWithDetails } from '../types';
 
 type MapWithInputsProps = {
   location: { latitude: number; longitude: number };
   radius: number;
   setRadius: (r: number) => void;
-  stores: StoreWithDetails[]; // ✅ ServiceArea[] → StoreWithDetails[]
+  stores: StoreWithDetails[]; // ✅ StoreWithDetails로 수정
   mapRef: React.RefObject<MapView>;
 };
 
@@ -32,10 +33,11 @@ export default function MapWithInputs({
         }}
         placeholder="반경(m)"
       />
+
       <Map
         myLat={location.latitude}
         myLon={location.longitude}
-        serviceAreas={stores}
+        serviceAreas={stores} // ✅ 그대로 넘겨도 OK
         mapRef={mapRef}
       />
     </View>

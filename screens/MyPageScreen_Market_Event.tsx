@@ -15,7 +15,6 @@ type EventItem = {
   title: string;
   description: string;
   date: string;
-  image: any; // require('../assets/...')
 };
 
 export default function MyPageScreen_Market_Event() {
@@ -27,8 +26,6 @@ export default function MyPageScreen_Market_Event() {
   const fetchEvents = async () => {
     try {
       const snapshot = await getDocs(collection(db, 'events'));
-      console.log('📥 가져온 문서 수:', snapshot.size);
-
       const fetched = snapshot.docs.map(doc => {
         const data = doc.data();
         let date = '';
@@ -45,7 +42,6 @@ export default function MyPageScreen_Market_Event() {
           title: data.title || '(제목 없음)',
           description: data.description || '',
           date,
-          image: require('../assets/event1.jpg'), // 항상 동일한 로컬 이미지 사용
         };
       });
 
@@ -98,7 +94,7 @@ export default function MyPageScreen_Market_Event() {
           marginBottom: 12
         }}>
           <Ionicons name="calendar-outline" size={24} />
-          <Text style={{ fontSize: 16, fontWeight: 'bold', marginHorizontal: 8, flex: 1 }}>이벤트</Text>
+          <Text style={{ fontSize: 16, fontWeight: 'bold', marginHorizontal: 8, flex: 1 }}>イベント</Text>
           <TouchableOpacity onPress={onPressAdd}>
             <Ionicons name="add-circle-outline" size={28} color="#007AFF" />
           </TouchableOpacity>
@@ -107,7 +103,14 @@ export default function MyPageScreen_Market_Event() {
         {events.map(ev => (
           <TouchableOpacity
             key={ev.id}
-            onPress={() => navigation.navigate('EventDetail', ev)} // 상세 화면으로 데이터 전달
+            onPress={() =>
+              navigation.navigate('EventUpdate', {
+                id: ev.id,
+                title: ev.title,
+                description: ev.description,
+                date: ev.date,
+              })
+            }
             style={{
               flexDirection: 'row',
               justifyContent: 'space-between',

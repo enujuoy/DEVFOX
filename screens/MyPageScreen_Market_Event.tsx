@@ -15,6 +15,7 @@ type EventItem = {
   title: string;
   description: string;
   date: string;
+  image: any;
 };
 
 export default function MyPageScreen_Market_Event() {
@@ -28,26 +29,22 @@ export default function MyPageScreen_Market_Event() {
       const snapshot = await getDocs(collection(db, 'events'));
       const fetched = snapshot.docs.map(doc => {
         const data = doc.data();
-        let date = '';
-        try {
-          const start = data.startDate?.toDate();
-          const end = data.endDate?.toDate();
-          date = `${format(start, 'yyyy.MM.dd')}～${format(end, 'yyyy.MM.dd')}`;
-        } catch (err) {
-          console.warn('⚠️ 날짜 변환 오류:', err);
-        }
+        const start = data.startDate?.toDate();
+        const end = data.endDate?.toDate();
+        const date = `${format(start, 'yyyy.MM.dd')}～${format(end, 'yyyy.MM.dd')}`;
 
         return {
           id: doc.id,
           title: data.title || '(제목 없음)',
           description: data.description || '',
           date,
+          image: require('../assets/event1.jpg'),
         };
       });
 
       setEvents(fetched);
     } catch (err) {
-      console.error('❌ 이벤트 불러오기 오류:', err);
+      console.error('이벤트 로딩 실패:', err);
     }
   };
 
@@ -71,9 +68,9 @@ export default function MyPageScreen_Market_Event() {
     if (!toDeleteId) return;
     try {
       await deleteDoc(doc(db, 'events', toDeleteId));
-      setEvents(ev => ev.filter(e => e.id !== toDeleteId));
+      setEvents(prev => prev.filter(e => e.id !== toDeleteId));
     } catch (err) {
-      console.error('삭제 오류:', err);
+      console.error('삭제 실패:', err);
     } finally {
       setModalVisible(false);
     }
@@ -94,7 +91,7 @@ export default function MyPageScreen_Market_Event() {
           marginBottom: 12
         }}>
           <Ionicons name="calendar-outline" size={24} />
-          <Text style={{ fontSize: 16, fontWeight: 'bold', marginHorizontal: 8, flex: 1 }}>イベント</Text>
+          <Text style={{ fontSize: 16, fontWeight: 'bold', marginHorizontal: 8, flex: 1 }}>이벤트</Text>
           <TouchableOpacity onPress={onPressAdd}>
             <Ionicons name="add-circle-outline" size={28} color="#007AFF" />
           </TouchableOpacity>
@@ -103,14 +100,7 @@ export default function MyPageScreen_Market_Event() {
         {events.map(ev => (
           <TouchableOpacity
             key={ev.id}
-            onPress={() =>
-              navigation.navigate('EventUpdate', {
-                id: ev.id,
-                title: ev.title,
-                description: ev.description,
-                date: ev.date,
-              })
-            }
+            onPress={() => navigation.navigate('EventDetail', ev)}
             style={{
               flexDirection: 'row',
               justifyContent: 'space-between',

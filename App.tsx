@@ -8,11 +8,18 @@ import MapScreen from './screens/MapScreen';
 import StoreDetailsScreen from './screens/StoreDetailsScreen';
 import EventDetailScreen from './screens/EventDetailScreen';
 import * as Notifications from 'expo-notifications';
+import ProductRegistrationScreen from './screens/ProductRegistrationScreen';
+import ServiceAreaInfoScreen from './screens/ServiceAreaInfoScreen';
+
 
 export type RootStackParamList = {
   MainTabs: undefined;
   CategorySetting: undefined;
   Map: undefined;
+  StoreRegister: undefined;
+  ProductRegistration: undefined;
+  ServiceAreaInfoScreen: undefined;
+  EventManagement: undefined;
   StoreDetails: {
     storeCode: string;
     areaName: string;
@@ -44,6 +51,8 @@ export default function App() {
         <RootStack.Screen name="Map" component={MapScreen} />
         <RootStack.Screen name="StoreDetails" component={StoreDetailsScreen} />
         <RootStack.Screen name="EventDetail" component={EventDetailScreen} />
+        <RootStack.Screen name="ProductRegistration" component={ProductRegistrationScreen} />
+        <RootStack.Screen name="ServiceAreaInfoScreen" component={ServiceAreaInfoScreen} />
       </RootStack.Navigator>
     </NavigationContainer>
   );

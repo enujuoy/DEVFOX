@@ -6,7 +6,7 @@ import { StoreWithDetails } from '../types';
 type MapProps = {
   myLat: number;
   myLon: number;
-  serviceAreas: StoreWithDetails[]; // ✅ 여기!! ServiceArea[] → StoreWithDetails[]
+  serviceAreas: StoreWithDetails[]; 
   mapRef: React.RefObject<MapView>;
 };
 

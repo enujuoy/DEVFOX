@@ -11,15 +11,15 @@ import {
 import Header from '../components/Header';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { HomeStackParamList } from '../components/BottomTab';
+import { RootStackParamList } from '../App';
 import { db } from '../firebaseConfig';
 import { collection, getDocs } from 'firebase/firestore';
 
-type EventScreenNavProp = StackNavigationProp<HomeStackParamList, 'Event'>;
+type NavigationProp = StackNavigationProp<RootStackParamList, 'EventDetail'>;
 
 export default function EventScreen() {
   const [events, setEvents] = useState<any[]>([]);
-  const navigation = useNavigation<EventScreenNavProp>();
+  const navigation = useNavigation<NavigationProp>();
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -58,10 +58,19 @@ export default function EventScreen() {
           >
             <Text style={styles.categoryText}>店舗</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.categoryButton}>
+          <TouchableOpacity 
+            style={styles.categoryButton}
+            onPress={() =>
+              navigation.navigate('StoreDetails', {
+                storeCode: 'STR003',
+                areaName: 'セブン-イレブン 大田区南六郡①丁目店',
+              })
+            }
+          >
             <Text style={styles.categoryText}>情報</Text>
           </TouchableOpacity>
         </View>
+
         <Text style={styles.title}>イベント</Text>
 
         {events.map((event, index) => (
@@ -70,7 +79,7 @@ export default function EventScreen() {
             onPress={() =>
               navigation.navigate('EventDetail', {
                 title: event.title || 'イベント',
-                image: require('../assets/event1.jpg'), // 임시 이미지
+                image: require('../assets/event1.jpg'),
                 description: event.description,
                 date: event.date || '日付未設定',
               })

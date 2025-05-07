@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
   },
   popupBlue: {
     position: 'absolute',
-    bottom: 200,
+    bottom: 210,
     left: 20,
     right: 20,
     backgroundColor: '#add8e699',

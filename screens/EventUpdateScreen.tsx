@@ -1,3 +1,4 @@
+// screens/EventUpdateScreen.tsx
 import React, { useState } from 'react';
 import {
   View,
@@ -17,57 +18,30 @@ import { addEventToFirestore } from '../firebaseUtils/addEvent';
 
 type Props = StackScreenProps<MyPageMarketStackParamList, 'EventUpdate'>;
 
-export default function EventUpdateScreen({ navigation, route }: Props) {
-  const isEdit = !!route.params;
-
-  console.log('route.params:', route.params); // 🔍 로그 출력
-
-  const parseDateRange = (range?: string) => {
-    if (!range || !range.includes('～')) return [new Date(), new Date()];
-    const [startStr, endStr] = range.split('～');
-    const start = new Date(startStr);
-    const end = new Date(endStr);
-    return [
-      isNaN(start.getTime()) ? new Date() : start,
-      isNaN(end.getTime()) ? new Date() : end,
-    ];
-  };
-
-  const [startDate, setStartDate] = useState(() => {
-    if (isEdit) {
-      const [start] = parseDateRange(route.params.date);
-      return start;
-    }
-    return new Date();
-  });
-
-  const [endDate, setEndDate] = useState(() => {
-    if (isEdit) {
-      const [, end] = parseDateRange(route.params.date);
-      return end;
-    }
-    return new Date();
-  });
-
-  const [title, setTitle] = useState(route.params?.title || '');
-  const [desc, setDesc] = useState(route.params?.description || '');
-  const [fileName, setFileName] = useState('');
+export default function EventUpdateScreen({ navigation }: Props) {
+  const [startDate, setStartDate] = useState(new Date());
+  const [endDate, setEndDate] = useState(new Date());
   const [showStart, setShowStart] = useState(false);
   const [showEnd, setShowEnd] = useState(false);
+  const [title, setTitle] = useState('');
+  const [desc, setDesc] = useState('');
+  const [fileName, setFileName] = useState('');
 
+  // 📎 파일 첨부 함수 개선 (type 오류 제거)
   const pickFile = async () => {
     try {
       const res = await DocumentPicker.getDocumentAsync({});
       if (!res.canceled && res.assets?.length > 0) {
         setFileName(res.assets[0].name);
       } else {
-        console.log('📁 파일 선택 취소 또는 없음');
+        console.log('파일 선택 취소 또는 없음');
       }
     } catch (e: any) {
       Alert.alert('파일 선택 중 예외가 발생했습니다.', e.message);
     }
   };
 
+  // 🛠 유효성 검사 추가 및 포맷
   const onCreate = async () => {
     if (!title.trim()) {
       Alert.alert('イベント名を入力してください。');
@@ -77,18 +51,19 @@ export default function EventUpdateScreen({ navigation, route }: Props) {
       Alert.alert('시작일은 종료일보다 빠르거나 같아야 합니다.');
       return;
     }
-
+  
     try {
       await addEventToFirestore(title, desc, startDate, endDate, fileName);
-      Alert.alert(isEdit ? 'イベントが更新されました。' : 'イベントが作成されました。');
+      Alert.alert('イベントが作成されました。');
       navigation.goBack();
     } catch (e) {
-      Alert.alert('イベント保存に失敗しました。');
+      Alert.alert('イベント作成に失敗しました。');
     }
   };
 
   return (
     <View style={styles.container}>
+      {/* 📅 날짜 선택 */}
       <View style={styles.dateRow}>
         <TouchableOpacity onPress={() => setShowStart(true)}>
           <Text>{format(startDate, 'yyyy.MM.dd')}</Text>
@@ -98,7 +73,6 @@ export default function EventUpdateScreen({ navigation, route }: Props) {
           <Text>{format(endDate, 'yyyy.MM.dd')}</Text>
         </TouchableOpacity>
       </View>
-
       <DateTimePickerModal
         isVisible={showStart}
         mode="date"
@@ -108,7 +82,7 @@ export default function EventUpdateScreen({ navigation, route }: Props) {
           setShowStart(false);
         }}
         onCancel={() => setShowStart(false)}
-        minimumDate={new Date()}
+        minimumDate={new Date()} // 오늘 이전 선택 불가
       />
       <DateTimePickerModal
         isVisible={showEnd}
@@ -119,9 +93,10 @@ export default function EventUpdateScreen({ navigation, route }: Props) {
           setShowEnd(false);
         }}
         onCancel={() => setShowEnd(false)}
-        minimumDate={startDate}
+        minimumDate={startDate} // 시작일 이전 선택 불가
       />
 
+      {/* 📝 제목·설명 입력 */}
       <TextInput
         style={styles.input}
         placeholder="イベント名"
@@ -136,13 +111,15 @@ export default function EventUpdateScreen({ navigation, route }: Props) {
         multiline
       />
 
+      {/* 📎 파일 첨부 */}
       <TouchableOpacity style={styles.uploadBtn} onPress={pickFile}>
         <Text>ファイル添付</Text>
       </TouchableOpacity>
       {fileName ? <Text style={{ marginBottom: 12 }}>{fileName}</Text> : null}
 
+      {/* 🎯 버튼 */}
       <View style={styles.btnRow}>
-        <Button title={isEdit ? '更新' : '作成'} onPress={onCreate} />
+        <Button title="作成" onPress={onCreate} />
         <Button title="戻る" color="#999" onPress={() => navigation.goBack()} />
       </View>
     </View>

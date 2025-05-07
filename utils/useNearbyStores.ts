@@ -1,4 +1,6 @@
-import { useEffect, useState } from 'react';
+// utils/useNearbyStores.ts
+
+import { useEffect, useRef, useState } from 'react';
 import { getNearbyStores } from './getNearbyStores';
 import { db } from '../firebaseConfig';
 import { collection, query, where, getDocs } from 'firebase/firestore';
@@ -11,12 +13,11 @@ export default function useNearbyStores(lat: number, lon: number, radius: number
   const [popupText, setPopupText] = useState('');
   const [popupVisible, setPopupVisible] = useState(false);
   const [highlight, setHighlight] = useState(false);
-
   const [eventPopupText, setEventPopupText] = useState('');
   const [eventPopupVisible, setEventPopupVisible] = useState(false);
-
   const [selectedStore, setSelectedStore] = useState<StoreWithDetails | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<StoreEvent | null>(null);
+  const lastNotifiedId = useRef<string | null>(null);
 
   const hidePopup = () => setPopupVisible(false);
   const hideEventPopup = () => setEventPopupVisible(false);
@@ -63,14 +64,32 @@ export default function useNearbyStores(lat: number, lon: number, radius: number
           description: '',
           amenities,
           menu,
-          storeCode, // ✅ storeCode로 추가
+          storeCode,
         };
       })
     );
 
     setStores(detailedStores);
-    await notifyNearbyStores(nearby);
-    checkForPopup(detailedStores);
+
+    // ✅ 알림은 가장 가까운 매장 하나에만 보냄
+    let nearest: NearbyStore | null = null;
+    let minDistance = Infinity;
+
+    for (const store of nearby) {
+      const distance = getDistance(lat, lon, store.latitude, store.longitude);
+      if (distance < minDistance) {
+        minDistance = distance;
+        nearest = store;
+      }
+    }
+
+    if (nearest) {
+      await notifyNearbyStores([nearest], lat, lon, lastNotifiedId.current, (id) => {
+        lastNotifiedId.current = id;
+      });
+    }
+
+    await checkForPopup(detailedStores);
   };
 
   const checkForPopup = async (detailedStores: StoreWithDetails[]) => {
